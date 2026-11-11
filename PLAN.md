@@ -18,8 +18,12 @@ The project folder currently holds only the PDF (`cahier des charge/`). Machine:
    - **Full fine-tuning**: costliest. First run a timing benchmark (1 batch fwd+bwd per model). If an epoch of a model exceeds ~1h, run full fine-tuning on a stratified subset with few epochs, and state this in the Limitations section.
    - Fallback (outside the "local only" choice, but worth knowing): Kaggle gives free GPU hours and hosts the dataset. Using it for full fine-tuning only would keep all conditions identical and save days. Decide after the benchmark in Phase 1.
 2. **Python 3.14**: PyTorch/timm wheels may be missing. Create a venv with Python 3.11 or 3.12 (install via `py -3.12` or python.org) and pin versions in `requirements.txt`.
-3. **Dataset facts unverified.** I could not open Kaggle from here. Class names, image counts, and split are filled in only after downloading `hayder17/breast-cancer-detection` (needs a Kaggle account and API token).
-4. **Data leakage.** If images come from the same patient or are augmented copies, a random split inflates scores. Check for duplicates (hash) and, if patient IDs are unavailable, say so in Limitations.
+3. **Dataset: CBIS-DDSM, JPG version (chosen; the original hayder17 dataset has only 336 images and is dropped).** The user downloads it later into `data/cbis-ddsm/`. Counts are NOT verified: the Kaggle page lists 10,239 files, but these include full mammograms, crops and ROI masks. The real sample count comes from the CSVs (`calc_case(with_jpg_img).csv`, `mass_case(with_jpg_img).csv`) after download; fill the paper only with computed numbers. Rules:
+   - Use **full mammogram images only** (`jpg_fullMammo_img_path`); crop/ROI images may be missing or mismatched.
+   - Label: BENIGN and BENIGN_WITHOUT_CALLBACK -> benign; MALIGNANT -> malignant; an image is malignant if any of its lesions is malignant.
+   - Cite the CBIS-DDSM (Lee et al. 2017, Sci Data) and TCIA (Clark et al. 2013) papers given on the Kaggle page.
+   - Fallback if fewer than ~2,000 usable images or labels too messy: CMMD PNG (Kaggle `magpiesings/cmmd-mammogram-png-clinical-classification`).
+4. **Data leakage.** One patient has several images/views. **Split by patient ID, never by image**, and assert no patient appears in two splits. Also hash-check for duplicate images.
 5. **Metric choice.** Medical task: report recall/sensitivity and AUC, not just accuracy; handle class imbalance (class weights or weighted sampler).
 
 ## Repo layout (create in `c:\Users\hp\Desktop\S3\Deep Learning\projet`)

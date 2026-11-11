@@ -3,7 +3,9 @@
 seed: 42
 
 data:
-  root: data/breast-cancer-detection   # Kaggle: hayder17/breast-cancer-detection (verify layout after download)
+  root: data/cbis-ddsm                 # Kaggle "CBIS-DDSM: Breast Cancer Dataset of JPG Images"; use jpg_fullMammo_img_path only
+  split_by: patient_id                 # never split by image (several views per patient)
+  label_rule: malignant_if_any_lesion_malignant   # BENIGN + BENIGN_WITHOUT_CALLBACK -> benign
   image_size: 224
   split: {train: 0.70, val: 0.15, test: 0.15}   # stratified, fixed seed
   imagenet_mean: [0.485, 0.456, 0.406]
