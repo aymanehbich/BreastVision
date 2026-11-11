@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+data/
+checkpoints/
+cache/
+*.pt
+*.pth
+*.npy
+kaggle.json
+.env
+# paper build artefacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.synctex.gz

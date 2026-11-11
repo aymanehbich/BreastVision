@@ -1,0 +1,14 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+timm
+scikit-learn
+pandas
+matplotlib
+seaborn
+grad-cam
+pyyaml
+kaggle
+tqdm
+ipykernel
+nbformat

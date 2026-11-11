@@ -1,0 +1,45 @@
+# Shared protocol: IDENTICAL for every model and every regime (PDF requirement).
+# Values marked TODO are fixed after the CPU benchmark / EDA (Phase 0).
+seed: 42
+
+data:
+  root: data/breast-cancer-detection   # Kaggle: hayder17/breast-cancer-detection (verify layout after download)
+  image_size: 224
+  split: {train: 0.70, val: 0.15, test: 0.15}   # stratified, fixed seed
+  imagenet_mean: [0.485, 0.456, 0.406]
+  imagenet_std: [0.229, 0.224, 0.225]
+  num_workers: 2
+  class_imbalance: weighted_loss        # TODO confirm after EDA
+
+augmentation:                           # train split only
+  hflip: 0.5
+  rotation_deg: 10
+  brightness: 0.1
+  contrast: 0.1
+  scale: [0.9, 1.0]
+
+train:
+  optimizer: adamw
+  lr_head: 1.0e-3
+  lr_backbone: 1.0e-4                   # used in partial / full fine-tuning
+  weight_decay: 1.0e-4
+  batch_size: 16                        # TODO confirm after CPU benchmark
+  epochs: 15                            # TODO confirm after CPU benchmark
+  scheduler: cosine
+  early_stopping_patience: 4            # on validation loss
+  subset_fraction: 1.0                  # lower for full fine-tuning if CPU too slow (document in paper)
+
+regimes:
+  extract: {unfreeze_stages: 0}
+  partial: {unfreeze_stages: 1}         # last stage + head
+  full:    {unfreeze_stages: all}
+
+cv:
+  folds: 5                              # 3 if too slow
+
+models:                                 # timm names, ImageNet pretrained
+  xception: xception41                  # TODO verify exact timm name/weights available
+  resnext101: resnext101_32x8d
+  efficientnetv2: tf_efficientnetv2_s
+  maxvit: maxvit_base_tf_224
+  scratch_cnn: custom
