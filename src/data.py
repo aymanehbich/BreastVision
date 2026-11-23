@@ -95,6 +95,20 @@ def make_splits(m: pd.DataFrame, seed: int = 42, frac=(0.70, 0.15, 0.15)) -> pd.
     return m
 
 
+def add_cv_folds(m: pd.DataFrame, k: int, seed: int = 42) -> pd.DataFrame:
+    """Add a 'fold' column: patient-level stratified k-fold on train+val; test rows get -1.
+
+    Cross-validation therefore never touches the test set.
+    """
+    m = m.copy()
+    m["fold"] = -1
+    pool = m[m["split"] != "test"]
+    for f, (_, va) in enumerate(StratifiedGroupKFold(k, shuffle=True, random_state=seed)
+                                .split(pool, pool["label"], pool["patient_id"])):
+        m.loc[pool.index[va], "fold"] = f
+    return m
+
+
 def check_no_leakage(m: pd.DataFrame) -> None:
     """Assert that no patient appears in more than one split."""
     n = m.groupby("patient_id")["split"].nunique()
@@ -156,9 +170,61 @@ class MammoDataset:
         return (self.transform(img) if self.transform else img), int(r["label"])
 
 
+class DummyDataset:
+    """Random images + balanced labels with the same shapes as the real data.
+
+    Lets everyone develop and smoke-test without the dataset (cfg['data']['dummy'] = true).
+    """
+
+    def __init__(self, n: int, size: int, seed: int = 0):
+        import torch
+        g = torch.Generator().manual_seed(seed)
+        self.x = torch.randn(n, 3, size, size, generator=g)
+        self.y = torch.arange(n) % 2
+
+    def __len__(self):
+        return len(self.y)
+
+    def __getitem__(self, i):
+        return self.x[i], int(self.y[i])
+
+
+def get_loaders(cfg: dict, fold: int | None = None):
+    """Return (train, val, test) DataLoaders. THE data interface of the project (see CONTRACT.md).
+
+    fold=None : fixed split from the manifest (train / val / test).
+    fold=k    : cross-validation; val = the train+val images whose fold == k, train = the rest.
+                The test loader is the same in both cases and must only be used with final=True.
+    cfg['data']['dummy'] = true returns random data instead (no dataset needed).
+    """
+    from torch.utils.data import DataLoader
+    d, bs = cfg["data"], cfg["train"]["batch_size"]
+    size = d["image_size"]
+
+    def loader(ds, shuffle):
+        return DataLoader(ds, batch_size=bs, shuffle=shuffle, num_workers=d["num_workers"])
+
+    if d.get("dummy", False):
+        return (loader(DummyDataset(64, size, 0), True), loader(DummyDataset(32, size, 1), False),
+                loader(DummyDataset(32, size, 2), False))
+
+    m = pd.read_csv(d["manifest"])
+    cache = Path(d["cache_dir"]) / str(size)
+    if fold is None:
+        tr, va = m[m["split"] == "train"], m[m["split"] == "val"]
+    else:
+        pool = m[m["split"] != "test"]
+        tr, va = pool[pool["fold"] != fold], pool[pool["fold"] == fold]
+    te = m[m["split"] == "test"]
+    return tuple(loader(MammoDataset(df, cache, get_transforms(cfg, train)), train)
+                 for df, train in ((tr, True), (va, False), (te, False)))
+
+
 # --------------------------------------------------------------------------- CLI
 def _stats(m: pd.DataFrame) -> None:
     print(f"images: {len(m)} | patients: {m['patient_id'].nunique()}")
+    if "fold" in m:
+        print("CV folds (train+val images per fold, -1 = test):", m["fold"].value_counts().sort_index().to_dict())
     print("label (0=benign, 1=malignant):", m["label"].value_counts().sort_index().to_dict())
     print("images with >1 lesion:", int((m["n_lesions"] > 1).sum()),
           "| conflicting benign+malignant lesions:", int(m["label_conflict"].sum()))
@@ -182,6 +248,7 @@ if __name__ == "__main__":
     if a.cmd == "build":
         man = make_splits(build_manifest(root), cfg["seed"],
                           tuple(cfg["data"]["split"][k] for k in ("train", "val", "test")))
+        man = add_cv_folds(man, cfg["cv"]["folds"], cfg["seed"])
         man_path.parent.mkdir(parents=True, exist_ok=True)
         man.to_csv(man_path, index=False)
         _stats(man)
