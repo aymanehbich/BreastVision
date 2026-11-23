@@ -6,7 +6,7 @@ data/
 checkpoints/
 cache/
 cahier des charge/
-PLAN.md
+/PLAN.md
 *.pt
 *.pth
 *.npy

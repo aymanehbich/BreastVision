@@ -1,19 +1,21 @@
 # Shared protocol: IDENTICAL for every model and every regime (PDF requirement).
-# Values marked TODO are fixed after the CPU benchmark / EDA (Phase 0).
+# Values marked "provisional" are final only after the CPU benchmark (Houcine) / EDA (Aymane).
+# After tag contract-v1 this file changes only with the agreement of the 3 students.
 seed: 42
 
 data:
-  root: data/cbis-ddsm                 # Kaggle "CBIS-DDSM: Breast Cancer Dataset of JPG Images"; use jpg_fullMammo_img_path only
+  root: data/cbis-ddsm                 # Kaggle awsaf49/cbis-ddsm-breast-cancer-image-dataset (folders csv/ and jpeg/)
   split_by: patient_id                 # never split by image (several views per patient)
   label_rule: malignant_if_any_lesion_malignant   # BENIGN + BENIGN_WITHOUT_CALLBACK -> benign
-  manifest: results/manifest.csv       # one row per full mammogram + patient-level split (committed)
+  manifest: results/manifest.csv       # one row per full mammogram + patient-level split + CV fold (committed)
   cache_dir: data/cache                # letterboxed resized images (git-ignored)
+  dummy: false                         # true -> random images, no dataset needed (smoke tests, development)
   image_size: 224
   split: {train: 0.70, val: 0.15, test: 0.15}   # stratified, fixed seed
   imagenet_mean: [0.485, 0.456, 0.406]
   imagenet_std: [0.229, 0.224, 0.225]
   num_workers: 2
-  class_imbalance: weighted_loss        # TODO confirm after EDA
+  class_imbalance: weighted_loss        # provisional until the EDA (classes are 1728 benign / 1375 malignant)
 
 augmentation:                           # train split only
   hflip: 0.5
@@ -27,8 +29,8 @@ train:
   lr_head: 1.0e-3
   lr_backbone: 1.0e-4                   # used in partial / full fine-tuning
   weight_decay: 1.0e-4
-  batch_size: 16                        # TODO confirm after CPU benchmark
-  epochs: 15                            # TODO confirm after CPU benchmark
+  batch_size: 16                        # provisional until the CPU benchmark
+  epochs: 15                            # provisional until the CPU benchmark
   scheduler: cosine
   early_stopping_patience: 4            # on validation loss
   subset_fraction: 1.0                  # lower for full fine-tuning if CPU too slow (document in paper)
@@ -39,10 +41,10 @@ regimes:
   full:    {unfreeze_stages: all}
 
 cv:
-  folds: 5                              # 3 if too slow
+  folds: 5                              # provisional until the CPU benchmark (3 if too slow)
 
 models:                                 # timm names, ImageNet pretrained
-  xception: xception41                  # TODO verify exact timm name/weights available
+  xception: xception41                  # provisional: Fatima verifies the exact timm name / pretrained weights
   resnext101: resnext101_32x8d
   efficientnetv2: tf_efficientnetv2_s
   maxvit: maxvit_base_tf_224

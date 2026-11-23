@@ -1,0 +1,48 @@
+# One owner per file. Replace the placeholders with the real GitHub usernames
+# once the repository exists (do NOT leave them in the final version).
+#   @aymane-username  = Aymane Hbich
+#   @houcine-username = Houcine El Kabaoui
+#   @fatima-username  = Fatima Ezzahra
+
+# Default: Aymane (repo owner)
+*                         @aymane-username
+
+# Aymane: repo, data, MaxViT, scratch CNN
+/README.md                @aymane-username
+/CONTRACT.md              @aymane-username
+/requirements*.txt        @aymane-username
+/configs/                 @aymane-username
+/src/common.py            @aymane-username
+/src/data.py              @aymane-username
+/src/models/maxvit.py     @aymane-username
+/src/models/scratch_cnn.py @aymane-username
+/scripts/preprocess.py    @aymane-username
+/scripts/make_splits.py   @aymane-username
+/scripts/check_leakage.py @aymane-username
+/tests/test_data.py       @aymane-username
+/notebooks/01_eda.ipynb   @aymane-username
+/team/aymane/             @aymane-username
+/results/manifest.csv     @aymane-username
+
+# Houcine: training engine, freeze policies, ResNeXt, EfficientNetV2, benchmark
+/src/train.py             @houcine-username
+/src/models/__init__.py   @houcine-username
+/src/models/base.py       @houcine-username
+/src/models/resnext.py    @houcine-username
+/src/models/efficientnet.py @houcine-username
+/scripts/benchmark_cpu.py @houcine-username
+/tests/test_models.py     @houcine-username
+/results/tuning/          @houcine-username
+/team/houcine/            @houcine-username
+
+# Fatima: evaluation, cross-validation, Grad-CAM, Xception
+/src/evaluate.py          @fatima-username
+/src/gradcam.py           @fatima-username
+/src/cv.py                @fatima-username
+/src/models/xception.py   @fatima-username
+/scripts/aggregate_results.py @fatima-username
+/tests/test_eval.py       @fatima-username
+/tests/fake_runs.py       @fatima-username
+/notebooks/02_results.ipynb @fatima-username
+/results/figures/         @fatima-username
+/team/fatima/             @fatima-username
