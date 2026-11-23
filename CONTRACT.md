@@ -3,12 +3,18 @@
 Status: **draft v1**, to be reviewed by Aymane, Houcine and Fatima, then tagged `contract-v1`.
 After the tag it changes only with the agreement of the 3 students (open a pull request that edits this file).
 
+Two separate freezes, so nobody waits for the benchmark:
+- **`contract-v1`**: the interfaces in this file. Tagged as soon as the 3 students have reviewed it.
+- **`protocol-v1`**: the final values in `configs/base.yaml`. Tagged after Houcine's benchmark (`scripts/benchmark.py`).
+
 Everything below is checked by `tests/` and exercised on dummy data first (`data.dummy: true` in `configs/base.yaml`).
 
 ## 1. Shared protocol
 `configs/base.yaml` is the single source of hyperparameters, identical for all models and regimes.
 Nobody hard-codes seed, batch size, epochs, learning rates or paths. Load it with `src.common.load_config()`.
-Values marked *provisional* are fixed after the CPU benchmark (Houcine).
+Values marked *provisional* are fixed after the benchmark (Houcine, `scripts/benchmark.py`: batch time on GPU and CPU, largest batch that fits in VRAM). Until `protocol-v1`, code must read them from the config and never assume them.
+Hardware settings live in `train:` (`device: auto`, `amp`, `grad_accum`) and `data.num_workers`. All students use the same **effective batch size** (`batch_size * grad_accum`): when VRAM differs, change `grad_accum` locally, never the effective batch. AMP is on for everyone or off for everyone.
+`device: auto` means CUDA if available, else CPU (`src.common.get_device(cfg)`).
 
 ## 2. Data (owner: Aymane)
 ```python
@@ -51,7 +57,7 @@ Use `from src.models import build_model, get_module` to create a model by config
 from src.train import run
 run_dir = run(model, mode, cfg, fold=None, final=False)   # mode: "extract" | "partial" | "full"
 ```
-Early stopping on validation loss, checkpoint every epoch with resume (checkpoints stay local in `checkpoints/`, not in Git).
+Uses `cfg["train"]` (`device`, `amp`, `grad_accum`, ...). Early stopping on validation loss, checkpoint every epoch with resume (checkpoints stay local in `checkpoints/`, not in Git).
 `final=True` is the only call allowed to read the test loader.
 
 ## 5. Run folder
@@ -61,7 +67,10 @@ Early stopping on validation loss, checkpoint every epoch with resume (checkpoin
 |---|---|
 | `history.csv` | per epoch: `epoch, train_loss, train_acc, val_loss, val_acc, epoch_time_s` |
 | `val_preds.csv` | `image_id, label, prob_malignant` on the validation images |
-| `meta.json` | model, mode, fold, total params, trainable params, training time, hardware (`src.common.hardware_info()`), torch version, git commit, config used |
+| `meta.json` | model, mode, fold, total params, trainable params, training time, git commit, config used, and the hardware/software block below |
+
+`meta.json` **must** record (use `src.common.hardware_info(cfg)`, which returns all of it): `gpu_name`, `gpu_vram_gb`, `cuda_version`, `torch` (version), `device`, `amp`, `grad_accum`, plus machine, OS, CPU count and Python version.
+Training times are not comparable across different GPUs, so the paper either times all models on one machine or states the hardware per row.
 | `test_preds.csv` | same columns as `val_preds.csv`, **only when `final=True`** |
 
 Each owner writes only the run folders of their own models, so there are no Git conflicts.
@@ -74,3 +83,4 @@ The test set is used **once**, at the end, after model selection on validation (
 - One branch per person (`aymane/...`, `houcine/...`, `fatima/...`), small pull requests into `main`, commit at each step.
 - Every file has one owner (`.github/CODEOWNERS`). To change a file you do not own, ask its owner.
 - `data/`, `checkpoints/`, caches and virtual environments are never committed.
+- `requirements.txt` does **not** pin `torch` / `torchvision` (CPU and CUDA builds differ). Install the build matching your machine with the commands in the README, with the same version number for everyone.

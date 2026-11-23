@@ -29,7 +29,7 @@
 /src/models/base.py       @houcineelka
 /src/models/resnext.py    @houcineelka
 /src/models/efficientnet.py @houcineelka
-/scripts/benchmark_cpu.py @houcineelka
+/scripts/benchmark.py @houcineelka
 /tests/test_models.py     @houcineelka
 /results/tuning/          @houcineelka
 /team/houcine/            @houcineelka

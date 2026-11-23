@@ -7,13 +7,23 @@ with Grad-CAM interpretability. Task: benign vs. malignant on full mammograms (C
 
 > Status: Phase 0 (setup) finished, Phase 1-2 in progress. Interfaces between team members: [CONTRACT.md](CONTRACT.md).
 
-## Setup (Windows, CPU only)
-Python 3.11 or 3.12 recommended.
+## Setup (Windows)
+Python 3.11 or 3.12 recommended. `torch` and `torchvision` are **not** in `requirements.txt` because the CPU and CUDA
+builds differ: install the one matching your machine **first**, with the same version number for everyone
+(currently 2.15.0 / 0.29.2), then the rest.
 ```powershell
 python -m venv .venv
+
+# A) NVIDIA GPU: pick the CUDA build matching your driver (see pytorch.org/get-started/locally), e.g. cu126
+.\.venv\Scripts\python.exe -m pip install torch==2.15.0 torchvision==0.29.2 --index-url https://download.pytorch.org/whl/cu126
+# B) CPU only
+.\.venv\Scripts\python.exe -m pip install torch==2.15.0 torchvision==0.29.2 --index-url https://download.pytorch.org/whl/cpu
+
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 ```
-`requirements-lock.txt` lists the exact versions used by the project.
+With a GPU the last command must print `True`. `configs/base.yaml` uses `device: auto` (CUDA if available, else CPU).
+`requirements-lock.txt` lists the exact versions of the other packages.
 
 ## Dataset
 Kaggle `awsaf49/cbis-ddsm-breast-cancer-image-dataset` (folders `csv/` and `jpeg/`). Put your `kaggle.json` in
@@ -38,7 +48,7 @@ images with the right shapes, so you can develop and test your code.
 ## Layout
 - `configs/base.yaml` – shared protocol, identical for all models
 - `src/` – `common.py`, `data.py`, `models/` (one file per model), `train.py`, `evaluate.py`, `gradcam.py`, `cv.py`
-- `scripts/` – splits, leakage check, CPU benchmark, results aggregation
+- `scripts/` – splits, leakage check, benchmark (GPU/CPU batch time, max batch in VRAM), results aggregation
 - `tests/`, `notebooks/` – tests, EDA and results analysis
 - `results/` – `manifest.csv`, `runs/<model>_<mode>_f<fold>/`, `tuning/`, `figures/`
 - `team/<name>/PLAN.md` – personal plans

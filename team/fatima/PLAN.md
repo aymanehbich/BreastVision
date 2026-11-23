@@ -6,9 +6,9 @@ Role: evaluation, cross-validation driver, Grad-CAM, figures, final assembly, Xc
 `src/evaluate.py`, `src/gradcam.py`, `src/cv.py`, `src/models/xception.py`, `scripts/aggregate_results.py`, `tests/test_eval.py`, `tests/fake_runs.py`, `notebooks/02_results.ipynb`, `results/figures/`.
 
 ## Phase 0 (days 1-2)
-- [ ] Python 3.11/3.12 venv, `pip install -r requirements.txt`, clone the repo
+- [ ] Python 3.11/3.12 venv; install the CUDA build of `torch` (commands in the README) and check that `torch.cuda.is_available()` is `True`; `pip install -r requirements.txt`; clone the repo
 - [ ] Smoke test Xception on dummy data: create, forward pass, parameter count, time of 1 batch forward+backward. Check the exact timm name and pretrained weights (`xception41` or `xception`) and tell the team, so `configs/base.yaml` can be fixed
-- [ ] Read `CONTRACT.md` with the others (1 hour) and confirm the laptop specs
+- [ ] Read `CONTRACT.md` with the others (1 hour) and confirm your GPU model and VRAM (`nvidia-smi`)
 
 ## Phase 2: evaluation code on fake data (days 3-7)
 - `xception.py`

@@ -7,11 +7,13 @@ Role: repo and Git, data pipeline, MaxViT-Base, CNN from scratch, README. Shared
 
 ## Phase 0 (days 1-2)
 - [x] Scaffold, requirements, config, manifest of 3,103 mammograms, patient-level split, image cache
-- [x] `CONTRACT.md`, `CODEOWNERS` (placeholders), skeleton of `src/`, dummy mode, CV folds in the manifest
-- [ ] GitHub repo, invite Houcine and Fatima, protect `main`, replace the CODEOWNERS usernames
-- [ ] `scripts/make_splits.py`, `scripts/check_leakage.py`, README how-to-run
-- [ ] Team review of `CONTRACT.md`, then tag `contract-v1`
-- [ ] Freeze `configs/base.yaml` once Houcine's CPU benchmark is in
+- [x] `CONTRACT.md`, `CODEOWNERS`, skeleton of `src/`, dummy mode, CV folds in the manifest
+- [x] GitHub repo, CODEOWNERS usernames
+- [ ] Check that Houcine and Fatima accepted the invitation, protect `main`
+- [x] `scripts/make_splits.py`, `scripts/check_leakage.py`, README how-to-run
+- [ ] Team review of `CONTRACT.md`, then tag `contract-v1` (does not wait for the benchmark)
+- [ ] Check what GPU the school PC has (`nvidia-smi`); if none, agree with the team how MaxViT-Base is run (Kaggle GPU, or a teammate's GPU)
+- [ ] Tag `protocol-v1` once Houcine's benchmark has fixed the values in `configs/base.yaml`
 
 ## Phase 1: data (days 2-5)
 - Duplicate check (file hashes), EDA notebook (class counts, image sizes, sample grid), decide class-imbalance handling
