@@ -1,6 +1,6 @@
 # Automated Breast Cancer Classification in Mammography Images via Transfer Learning
 
-Master ISI S3 – Deep Learning project (Projet 7), 2025-2026.
+Master ISI S3 – Deep Learning project (Projet 7), 2026-2027.
 Compares feature extraction, partial fine-tuning and full fine-tuning of pre-trained
 Xception, ResNeXt-101, EfficientNetV2 and MaxViT-Base, against a CNN trained from scratch,
 with Grad-CAM interpretability. Task: benign vs. malignant on full mammograms (CBIS-DDSM).
